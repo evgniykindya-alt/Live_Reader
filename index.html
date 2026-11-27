@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#080b12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GTA Reader">
+<meta name="apple-mobile-web-app-title" content="Reader">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-<title>GTA Live Reader</title>
+<title>Live Reader</title>
 <style>
 :root{color-scheme:dark;--bg:#080b12;--panel:#141a26;--panel2:#1d2635;--text:#f5f7fc;--muted:#9aa6ba;--line:#2a3548;--green:#54dda0}
 *{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 13px calc(24px + env(safe-area-inset-bottom));}
@@ -33,7 +33,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
 <body>
 <main>
 <header class="top">
- <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.9</div></div></div>
+ <div class="brand"><div class="logo">🔊</div><div>LIVE<div class="subbrand">READER · 1.9</div></div></div>
  <span class="pill" id="badge">ГОТОВ</span>
 </header>
 
@@ -176,7 +176,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
 </div>
 </section>
 
-<div class="foot">GTA Live Reader 1.9 · OCR + озвучка по персонажам · Стоп речи · Фильтр мусора · Android/iOS</div>
+<div class="foot">Live Reader 1.9 · OCR + озвучка по персонажам · Стоп речи · Фильтр мусора · Android/iOS</div>
 </main>
 <canvas id="workCanvas" hidden></canvas>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
@@ -211,16 +211,16 @@ function renderRect(){
  selection.style.width=(rect.w*100)+'%';
  selection.style.height=(rect.h*100)+'%';
 }
-function saveRect(){try{localStorage.setItem('gtaReaderRect',JSON.stringify(rect));}catch{}}
+function saveRect(){try{localStorage.setItem('ReaderRect',JSON.stringify(rect));}catch{}}
 try{
- const saved=JSON.parse(localStorage.getItem('gtaReaderRect')||'null');
+ const saved=JSON.parse(localStorage.getItem('ReaderRect')||'null');
  if(saved&&['x','y','w','h'].every(k=>Number.isFinite(saved[k])))rect=saved;
 }catch{}
 renderRect();
 
 function loadSettings(){
  try{
-  const s=JSON.parse(localStorage.getItem('gtaReaderSettings')||'{}');
+  const s=JSON.parse(localStorage.getItem('ReaderSettings')||'{}');
   if(s.autoSpeak!=null)$('autoSpeak').checked=!!s.autoSpeak;
   if(s.keepHistory!=null)$('keepHistory').checked=!!s.keepHistory;
   if(s.interval)$('interval').value=s.interval;
@@ -241,7 +241,7 @@ function loadSettings(){
 }
 function saveSettings(){
  try{
-  localStorage.setItem('gtaReaderSettings',JSON.stringify({
+  localStorage.setItem('ReaderSettings',JSON.stringify({
    autoSpeak:$('autoSpeak').checked,
    keepHistory:$('keepHistory').checked,
    interval:$('interval').value,
@@ -921,7 +921,7 @@ if($('exportHistory'))$('exportHistory').onclick=()=>{
  if(!state.history.length){setStatus('История пуста.');return;}
  const lines=state.history.map(h=>'['+h.time+'] '+h.text).join('\n');
  const blob=new Blob([lines],{type:'text/plain;charset=utf-8'});
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gta-reader-history.txt';a.click();URL.revokeObjectURL(a.href);
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='-reader-history.txt';a.click();URL.revokeObjectURL(a.href);
  setStatus('История экспортирована.','ok');
 };
 document.querySelectorAll('.card .section-title').forEach(title=>{
@@ -929,20 +929,20 @@ document.querySelectorAll('.card .section-title').forEach(title=>{
   if(e.target.closest('input,select,button,a'))return;
   const card=title.closest('.card');if(!card)return;
   card.classList.toggle('collapsed');
-  try{const map=JSON.parse(localStorage.getItem('gtaReaderCollapse')||'{}');const key=title.childNodes[0].textContent.trim();map[key]=card.classList.contains('collapsed');localStorage.setItem('gtaReaderCollapse',JSON.stringify(map));}catch{}
+  try{const map=JSON.parse(localStorage.getItem('ReaderCollapse')||'{}');const key=title.childNodes[0].textContent.trim();map[key]=card.classList.contains('collapsed');localStorage.setItem('ReaderCollapse',JSON.stringify(map));}catch{}
  });
 });
 try{
- const map=JSON.parse(localStorage.getItem('gtaReaderCollapse')||'{}');
+ const map=JSON.parse(localStorage.getItem('ReaderCollapse')||'{}');
  document.querySelectorAll('.card .section-title').forEach(title=>{
   const key=title.childNodes[0].textContent.trim();
   if(key in map){const card=title.closest('.card');if(card)card.classList.toggle('collapsed',!!map[key]);}
  });
 }catch{}
 const __save=saveSettings;
-saveSettings=function(){__save();try{const s=JSON.parse(localStorage.getItem('gtaReaderSettings')||'{}');s.voiceVol=$('voiceVol')?$('voiceVol').value:1;s.contrast=$('contrast')?$('contrast').value:1;localStorage.setItem('gtaReaderSettings',JSON.stringify(s));}catch{}};
+saveSettings=function(){__save();try{const s=JSON.parse(localStorage.getItem('ReaderSettings')||'{}');s.voiceVol=$('voiceVol')?$('voiceVol').value:1;s.contrast=$('contrast')?$('contrast').value:1;localStorage.setItem('ReaderSettings',JSON.stringify(s));}catch{}};
 const __load=loadSettings;
-loadSettings=function(){__load();try{const s=JSON.parse(localStorage.getItem('gtaReaderSettings')||'{}');if(s.voiceVol&&$('voiceVol')){$('voiceVol').value=s.voiceVol;if($('volValue'))$('volValue').textContent=Number(s.voiceVol).toFixed(2);}if(s.contrast!=null&&$('contrast')){$('contrast').value=s.contrast;const L=['мягкий','норма','жёсткий'];if($('contrastValue'))$('contrastValue').textContent=L[Number(s.contrast)]||'норма';}}catch{}};
+loadSettings=function(){__load();try{const s=JSON.parse(localStorage.getItem('ReaderSettings')||'{}');if(s.voiceVol&&$('voiceVol')){$('voiceVol').value=s.voiceVol;if($('volValue'))$('volValue').textContent=Number(s.voiceVol).toFixed(2);}if(s.contrast!=null&&$('contrast')){$('contrast').value=s.contrast;const L=['мягкий','норма','жёсткий'];if($('contrastValue'))$('contrastValue').textContent=L[Number(s.contrast)]||'норма';}}catch{}};
 
 
 loadSettings();
