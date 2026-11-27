@@ -1,0 +1,10 @@
+{
+  "name": "GTA Live Translator",
+  "short_name": "GTA Translator",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#090b12",
+  "theme_color": "#090b12",
+  "orientation": "portrait",
+  "icons": []
+}
