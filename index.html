@@ -25,7 +25,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
 <body>
 <main>
 <header class="top">
- <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.5</div></div></div>
+ <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.6</div></div></div>
  <span class="pill" id="badge">ГОТОВ</span>
 </header>
 
@@ -104,12 +104,20 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
 </section>
 
 <section class="card">
- <div class="section-title">5 · ИСТОРИЯ</div>
+ <div class="section-title">5 · ГОЛОСА ПЕРСОНАЖЕЙ</div>
+ <div class="switchline"><span>Разные голоса по имени (Люсия:, Джексон:)</span><input type="checkbox" id="useSpeakers" checked></div>
+ <div class="switchline"><span>Не произносить имя вслух (только реплику)</span><input type="checkbox" id="skipName" checked></div>
+ <div id="speakerList" class="history" style="max-height:180px;margin-top:8px"><div class="empty">Пока нет персонажей. Они появятся из субтитров вида «Имя: текст».</div></div>
+ <div class="note">Если в субтитрах есть <b>Имя:</b> или <b>Имя —</b>, приложение запомнит персонажа и назначит голос/тон. Можно сменить вручную. На iPhone разных русских голосов мало — тогда различаем pitch (выше/ниже).</div>
+</section>
+
+<section class="card">
+ <div class="section-title">6 · ИСТОРИЯ</div>
  <div class="history" id="history"><div class="empty">История пуста.</div></div>
  <button class="wide danger" id="clearHistory" style="margin-top:10px">Очистить</button>
 </section>
 
-<div class="foot">GTA Live Reader 1.5 · OCR: Tesseract.js (rus+eng) · Озвучка: системный голос iOS · Интернет нужен только для первой загрузки моделей</div>
+<div class="foot">GTA Live Reader 1.6 · OCR + озвучка по персонажам · Системные голоса iOS · Модель OCR качается один раз</div>
 </main>
 <canvas id="workCanvas" hidden></canvas>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
@@ -122,10 +130,12 @@ const canvas=$('workCanvas'), ctx=canvas.getContext('2d',{willReadFrequently:tru
 
 const state={
  stream:null, worker:null, loop:false, busy:false,
- voices:[], candidate:'', candidateCount:0,
+ voices:[], allVoices:[], candidate:'', candidateCount:0,
  lastSpoken:'', lastSpokenAt:0, history:[],
  speechUnlocked:false, scanTimer:null,
- wakeLock:null, pendingText:'', speaking:false
+ wakeLock:null, pendingText:'', speaking:false,
+ speakers:{}, // name -> {voiceIndex, pitch, rate}
+ speakerOrder:[]
 };
 
 const defaults={x:.05,y:.68,w:.90,h:.25};
@@ -162,6 +172,11 @@ function loadSettings(){
    $('rateValue').textContent=Number(s.voiceRate).toFixed(2).replace('.',',')+'×';
   }
   if(Array.isArray(s.history)){state.history=s.history;renderHistory();}
+  if(s.speakers&&typeof s.speakers==='object')state.speakers=s.speakers;
+  if(Array.isArray(s.speakerOrder))state.speakerOrder=s.speakerOrder;
+  if(s.useSpeakers!=null)$('useSpeakers').checked=!!s.useSpeakers;
+  if(s.skipName!=null)$('skipName').checked=!!s.skipName;
+  renderSpeakers();
  }catch{}
 }
 function saveSettings(){
@@ -173,11 +188,15 @@ function saveSettings(){
    confidence:$('confidence').value,
    ocrLang:$('ocrLang').value,
    voiceRate:$('voiceRate').value,
-   history:$('keepHistory').checked?state.history:[]
+   history:$('keepHistory').checked?state.history:[],
+   speakers:state.speakers,
+   speakerOrder:state.speakerOrder,
+   useSpeakers:$('useSpeakers').checked,
+   skipName:$('skipName').checked
   }));
  }catch{}
 }
-['autoSpeak','keepHistory','interval','confidence','ocrLang'].forEach(id=>$(id).addEventListener('change',saveSettings));
+['autoSpeak','keepHistory','interval','confidence','ocrLang','useSpeakers','skipName'].forEach(id=>$(id).addEventListener('change',saveSettings));
 $('voiceRate').addEventListener('input',()=>{
  $('rateValue').textContent=Number($('voiceRate').value).toFixed(2).replace('.',',')+'×';
  saveSettings();
@@ -205,9 +224,10 @@ $('resetFrame').onclick=()=>{rect={...defaults};renderRect();saveRect();setStatu
 function loadVoices(){
  if(!('speechSynthesis'in window))return;
  const all=speechSynthesis.getVoices();
- // Prefer Russian, then any
+ state.allVoices=all;
  state.voices=all.filter(v=>/^ru/i.test(v.lang)||/russian/i.test(v.name));
- if(!state.voices.length)state.voices=all.filter(v=>/^en/i.test(v.lang)).slice(0,8);
+ if(!state.voices.length)state.voices=all.filter(v=>/^en/i.test(v.lang)).slice(0,12);
+ if(!state.voices.length)state.voices=all.slice(0,12);
  const sel=$('voiceSelect'),old=sel.value;
  sel.innerHTML='<option value="">Авто (русский приоритет)</option>';
  state.voices.forEach((v,i)=>{
@@ -215,8 +235,90 @@ function loadVoices(){
   o.value=String(i);o.textContent=v.name+' · '+v.lang;sel.append(o);
  });
  if(old)sel.value=old;
+ renderSpeakers();
 }
 if('speechSynthesis'in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
+
+
+// ——— Speakers / character voices ———
+function parseSpeaker(text){
+  // "Люсия: привет", "Lucia — hello", "ДЖЕКСОН:"
+  const m=String(text||'').match(/^\s*([\p{L}][\p{L}\p{N}'’\-]{0,28})\s*[:—–-]\s*(.+)$/u);
+  if(!m)return {name:null, line:String(text||'').trim()};
+  const name=m[1].trim();
+  const line=m[2].trim();
+  if(name.length<2||line.length<1)return {name:null, line:String(text||'').trim()};
+  return {name, line};
+}
+
+const PITCH_CYCLE=[1.0, 1.15, 0.88, 1.25, 0.8, 1.08, 0.92];
+const RATE_CYCLE=[1.0, 1.05, 0.95, 1.1, 0.9];
+
+function ensureSpeaker(name){
+  const key=name.toLowerCase();
+  if(state.speakers[key])return state.speakers[key];
+  const idx=state.speakerOrder.length;
+  const conf={
+    display:name,
+    voiceIndex: state.voices.length ? (idx % state.voices.length) : -1,
+    pitch: PITCH_CYCLE[idx % PITCH_CYCLE.length],
+    rateMul: RATE_CYCLE[idx % RATE_CYCLE.length]
+  };
+  state.speakers[key]=conf;
+  state.speakerOrder.push(key);
+  saveSettings();
+  renderSpeakers();
+  return conf;
+}
+
+function renderSpeakers(){
+  const el=$('speakerList');
+  if(!el)return;
+  el.innerHTML='';
+  if(!state.speakerOrder.length){
+    el.innerHTML='<div class="empty">Пока нет персонажей. Они появятся из субтитров вида «Имя: текст».</div>';
+    return;
+  }
+  state.speakerOrder.forEach(key=>{
+    const conf=state.speakers[key];
+    if(!conf)return;
+    const row=document.createElement('div');
+    row.className='history-item';
+    row.style.display='grid';
+    row.style.gridTemplateColumns='1fr 1.2fr auto';
+    row.style.gap='8px';
+    row.style.alignItems='center';
+    const nameEl=document.createElement('div');
+    nameEl.style.fontWeight='700';
+    nameEl.style.color='#8af0b9';
+    nameEl.textContent=conf.display;
+    const sel=document.createElement('select');
+    sel.innerHTML='<option value="-1">Авто + pitch '+conf.pitch.toFixed(2)+'</option>';
+    state.voices.forEach((v,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent=v.name.split(' ')[0]+' · '+v.lang;
+      if(Number(conf.voiceIndex)===i)o.selected=true;
+      sel.append(o);
+    });
+    sel.onchange=()=>{
+      conf.voiceIndex=Number(sel.value);
+      saveSettings();
+    };
+    const testBtn=document.createElement('button');
+    testBtn.className='secondary';
+    testBtn.style.minHeight='36px';
+    testBtn.style.padding='6px 10px';
+    testBtn.textContent='▶';
+    testBtn.onclick=()=>{
+      primeSpeech();
+      doSpeak(conf.display+': проверка голоса', true, conf);
+    };
+    row.append(nameEl, sel, testBtn);
+    el.append(row);
+  });
+}
+
 
 function primeSpeech(){
  if(!('speechSynthesis'in window))return;
@@ -233,7 +335,7 @@ function primeSpeech(){
  }catch{}
 }
 
-function doSpeak(text,forceUser=false){
+function doSpeak(text,forceUser=false,speakerConf=null){
  if(!('speechSynthesis'in window)){
   setStatus('Синтез речи не поддерживается.','error');
   return false;
@@ -241,17 +343,22 @@ function doSpeak(text,forceUser=false){
  text=String(text||'').trim();
  if(!text)return false;
 
- // Always try to resume + cancel previous
  try{if(speechSynthesis.paused)speechSynthesis.resume();}catch{}
  try{speechSynthesis.cancel();}catch{}
 
  const u=new SpeechSynthesisUtterance(text);
  u.lang='ru-RU';
- u.rate=Number($('voiceRate').value)||1;
+ const baseRate=Number($('voiceRate').value)||1;
+ u.rate=baseRate * (speakerConf && speakerConf.rateMul ? speakerConf.rateMul : 1);
+ u.pitch=speakerConf && speakerConf.pitch ? speakerConf.pitch : 1;
  u.volume=1;
- const ix=$('voiceSelect').value;
- if(ix!==''&&state.voices[Number(ix)])u.voice=state.voices[Number(ix)];
- else if(state.voices.length)u.voice=state.voices[0];
+ if(speakerConf && Number(speakerConf.voiceIndex)>=0 && state.voices[speakerConf.voiceIndex]){
+  u.voice=state.voices[speakerConf.voiceIndex];
+ }else{
+  const ix=$('voiceSelect').value;
+  if(ix!==''&&state.voices[Number(ix)])u.voice=state.voices[Number(ix)];
+  else if(state.voices.length)u.voice=state.voices[0];
+ }
 
  let started=false;
  u.onstart=()=>{
@@ -300,19 +407,35 @@ function doSpeak(text,forceUser=false){
  }
 }
 
-function speakRecognized(text){
+function speakRecognized(rawText){
  if(!$('autoSpeak').checked)return;
- state.pendingText=text;
- // Try automatic first
- doSpeak(text,false);
+ let speakText=rawText;
+ let conf=null;
+ if($('useSpeakers').checked){
+  const {name, line}=parseSpeaker(rawText);
+  if(name){
+   conf=ensureSpeaker(name);
+   speakText=$('skipName').checked ? line : (name+'. '+line);
+  }
+ }
+ state.pendingText=speakText;
+ doSpeak(speakText, false, conf);
 }
 
 // Big fallback button — always works because it is a direct user gesture
 $('speakNow').onclick=()=>{
- const t=state.pendingText||$('recognized').textContent;
- if(!t||t==='Ожидаю субтитры…')return;
+ const raw=state.pendingText||$('recognized').textContent;
+ if(!raw||raw==='Ожидаю субтитры…')return;
  primeSpeech();
- doSpeak(t,true);
+ let speakText=raw, conf=null;
+ if($('useSpeakers')&&$('useSpeakers').checked){
+  const {name, line}=parseSpeaker($('recognized').textContent);
+  if(name){
+   conf=ensureSpeaker(name);
+   speakText=$('skipName').checked ? line : (name+'. '+line);
+  }
+ }
+ doSpeak(speakText,true,conf);
 };
 
 $('voiceTest').onclick=()=>{
