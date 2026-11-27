@@ -1,6 +1,6 @@
 {
-  "name": "GTA Live Translator",
-  "short_name": "GTA Translator",
+  "name": "GTA Live Reader",
+  "short_name": "GTA Reader",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
