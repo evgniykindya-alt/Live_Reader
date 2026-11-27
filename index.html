@@ -3,184 +3,314 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090b12">
+<meta name="theme-color" content="#080b12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GTA Translator">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <title>GTA Live Translator</title>
 <style>
-:root{color-scheme:dark;--bg:#090b12;--panel:#151925;--panel2:#1d2331;--text:#f5f6fb;--muted:#9ba4b7;--green:#42d392;--line:#2a3243;--red:#ff667a}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 14px calc(20px + env(safe-area-inset-bottom));}
-main{max-width:720px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 18px}.brand{display:flex;gap:10px;align-items:center;font-weight:800;letter-spacing:.4px}.logo{width:38px;height:38px;border-radius:13px;background:#173c30;display:grid;place-items:center;color:var(--green);font-size:20px}.pill{font-size:11px;padding:6px 9px;border-radius:99px;background:#292f3d;color:var(--muted)}.pill.live{background:#123d2d;color:#72e6ae}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px;margin-bottom:12px}.section-title{font-size:12px;letter-spacing:.8px;color:var(--muted);font-weight:700;margin-bottom:11px}.preview{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;display:grid;place-items:center}.preview video{width:100%;height:100%;object-fit:contain;display:none}.placeholder{color:#8d96a9;text-align:center;padding:20px}.placeholder b{display:block;color:#fff;margin:8px}.scan-frame{position:absolute;left:8%;top:70%;width:84%;height:22%;border:2px solid var(--green);border-radius:8px;box-shadow:0 0 0 999px #0002;pointer-events:none;display:none}.scan-frame:after{content:"ОБЛАСТЬ СУБТИТРОВ";position:absolute;top:-22px;left:0;background:#123d2d;color:#8af0bd;font-size:9px;padding:4px 7px;border-radius:5px}
-.row{display:flex;gap:8px;align-items:center}.row>*{min-width:0}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}button{border:0;border-radius:13px;padding:13px 12px;font-weight:700;color:white;background:var(--panel2);font-size:14px}button.primary{background:#1c754f}button:disabled{opacity:.45}.wide{width:100%}.status{font-size:12px;color:var(--muted);margin-top:10px;min-height:17px}.status.error{color:#ff8a98}
-label{display:block;color:var(--muted);font-size:12px;margin:12px 0 6px}input[type=range]{width:100%;accent-color:var(--green)}select,input[type=text]{width:100%;background:var(--panel2);border:1px solid var(--line);color:white;border-radius:11px;padding:11px;font-size:14px}
-.transcript{background:#10141e;border-radius:14px;padding:13px;margin-top:8px;min-height:88px}.tag{font-size:10px;color:var(--muted);letter-spacing:.7px;font-weight:800}.source{color:#d5d9e3;margin:7px 0 10px;line-height:1.4}.translation{font-size:19px;font-weight:700;line-height:1.35;color:#8af0bd}.empty{color:#727d91;font-size:14px;padding:7px 0}
-.history{max-height:220px;overflow:auto}.history-item{border-top:1px solid var(--line);padding:10px 0}.history-item small{display:block;color:var(--muted);margin-bottom:4px}.history-item div{line-height:1.35}.foot{font-size:11px;color:#788397;line-height:1.45;text-align:center;padding:8px 5px}
-.switchline{display:flex;justify-content:space-between;align-items:center;color:#dce1eb;font-size:13px;padding:7px 0}.switchline input{accent-color:var(--green);width:18px;height:18px}
-#cropCanvas{display:none}
-@media(min-width:600px){body{padding-top:24px}.preview{aspect-ratio:16/8}}
+:root{color-scheme:dark;--bg:#080b12;--panel:#141a26;--panel2:#1d2635;--text:#f5f7fc;--muted:#9aa6ba;--line:#2a3548;--green:#54dda0;--green2:#173e30;--red:#ff7185;--yellow:#f5c66a}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:var(--bg);color:var(--text);font:15px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 13px calc(24px + env(safe-area-inset-bottom));}
+main{max-width:760px;margin:0 auto}.top{display:flex;align-items:center;justify-content:space-between;padding:15px 3px 17px}.brand{display:flex;gap:10px;align-items:center;font-weight:850;letter-spacing:.45px}.logo{width:40px;height:40px;border-radius:14px;background:#173e30;display:grid;place-items:center;color:var(--green);font-size:21px}.subbrand{font-size:10px;color:var(--muted);font-weight:650;letter-spacing:1px;margin-top:2px}.pill{font-size:10px;padding:7px 10px;border-radius:99px;background:#293243;color:var(--muted);font-weight:800;letter-spacing:.4px}.pill.live{background:#123e2c;color:#7df0b7}.pill.warn{background:#49371b;color:#ffd78a}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:19px;padding:14px;margin-bottom:12px}.section-title{font-size:11px;letter-spacing:1px;color:var(--muted);font-weight:850;margin-bottom:11px}.preview{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;touch-action:pan-y;user-select:none}.preview video{display:none;width:100%;height:100%;object-fit:fill}.placeholder{position:absolute;inset:0;display:grid;place-content:center;text-align:center;color:#9aa6ba;padding:18px;font-size:13px}.placeholder strong{display:block;color:white;margin:7px 0 4px;font-size:15px}.selection{position:absolute;left:5%;top:69%;width:90%;height:24%;border:2px solid var(--green);border-radius:8px;box-shadow:0 0 0 999px #0005;display:none;touch-action:none;cursor:move}.selection:before{content:"ПЕРЕТАЩИ РАМКУ";position:absolute;left:0;top:-21px;background:#123e2c;color:#8df4bf;padding:3px 7px;border-radius:5px;font-size:9px;font-weight:800;letter-spacing:.4px}.handle{position:absolute;width:22px;height:22px;right:-7px;bottom:-7px;border:2px solid #06110c;background:var(--green);border-radius:7px;touch-action:none;cursor:nwse-resize}.preview-hint{font-size:11px;color:var(--muted);margin:8px 1px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}button{border:0;border-radius:12px;padding:12px 10px;font-weight:750;color:white;background:var(--panel2);font-size:13px;min-height:43px}button.primary{background:#176c49}button.secondary{background:#263247}button.danger{background:#452630;color:#ffc0c9}button:disabled{opacity:.42}.wide{width:100%}.status{font-size:12px;line-height:1.4;color:var(--muted);margin-top:10px;min-height:17px}.status.error{color:#ff9aaa}.status.ok{color:#7de6b1}
+.transcript{background:#0e1420;border:1px solid #202b3c;border-radius:14px;padding:13px;min-height:116px}.tag{font-size:9px;color:#8d9bb1;letter-spacing:1px;font-weight:850}.source{color:#e1e6f0;margin:7px 0 12px;line-height:1.4;min-height:18px;overflow-wrap:anywhere}.translation{font-size:19px;font-weight:750;line-height:1.35;color:#8af0b9;min-height:27px;overflow-wrap:anywhere}.switchline{display:flex;justify-content:space-between;align-items:center;color:#e0e6f0;font-size:13px;padding:9px 1px}.switchline input{accent-color:var(--green);width:19px;height:19px}
+label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[type=range]{width:100%;accent-color:var(--green)}select,input[type=text],textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:white;border-radius:11px;padding:11px;font-size:14px}textarea{min-height:65px;resize:vertical}.value{color:#eaf3ee;font-weight:800}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.history{max-height:250px;overflow:auto}.history-item{border-top:1px solid var(--line);padding:10px 0}.history-item small{display:block;color:var(--muted);margin-bottom:4px}.history-item div{line-height:1.35;overflow-wrap:anywhere}.history-item .ru{color:#8af0b9;margin-top:4px}.empty{color:#758198;font-size:13px;padding:8px 0}.foot{font-size:10px;color:#77849a;line-height:1.5;text-align:center;padding:9px 5px 4px}.note{background:#242a38;border-radius:11px;padding:10px 11px;color:#b7c2d4;font-size:11px;line-height:1.45;margin-top:10px}.note b{color:#fff}.progress{height:4px;background:#283246;border-radius:99px;overflow:hidden;margin-top:10px;display:none}.progress>i{display:block;height:100%;width:35%;background:var(--green);animation:move 1.2s infinite ease-in-out alternate}@keyframes move{from{transform:translateX(-10%)}to{transform:translateX(190%)}}.hidden{display:none!important}
+@media(max-width:380px){body{padding-left:9px;padding-right:9px}.card{padding:11px}.grid2 button{font-size:12px}.translation{font-size:17px}}
 </style>
 </head>
 <body>
 <main>
 <header class="top">
- <div class="brand"><div class="logo">文</div><div>GTA LIVE<br><span style="color:var(--muted);font-size:11px;font-weight:600">TRANSLATOR · 1.0</span></div></div>
- <span class="pill" id="liveBadge">НЕ ЗАПУЩЕНО</span>
+ <div class="brand"><div class="logo">文</div><div>GTA LIVE<div class="subbrand">TRANSLATOR · 1.1</div></div></div>
+ <span class="pill" id="badge">ГОТОВ</span>
 </header>
 
 <section class="card">
- <div class="section-title">КАМЕРА · ЭКРАН ТЕЛЕВИЗОРА</div>
- <div class="preview">
+ <div class="section-title">1 · КАМЕРА И ОБЛАСТЬ СУБТИТРОВ</div>
+ <div class="preview" id="preview">
   <video id="video" autoplay muted playsinline></video>
-  <div class="placeholder" id="placeholder">▣<b>Камера ещё не включена</b>Поставь iPhone напротив телевизора и разреши доступ к камере.</div>
-  <div class="scan-frame" id="scanFrame"></div>
+  <div class="placeholder" id="placeholder">▣<strong>Камера ещё не включена</strong>Поставь iPhone напротив телевизора.<br>После запуска передвинь зелёную рамку на субтитры.</div>
+  <div class="selection" id="selection" aria-label="Область субтитров"><span class="handle" id="resizeHandle"></span></div>
  </div>
- <div class="buttons">
-  <button class="primary" id="startBtn">▶ Включить камеру</button>
-  <button id="stopBtn" disabled>Ⅱ Остановить</button>
+ <div class="preview-hint">Перемещение: тяни за рамку. Изменение размера: тяни за зелёный угол.</div>
+ <div class="grid2">
+  <button class="primary" id="start">▶ Запустить камеру</button>
+  <button class="danger" id="stop" disabled>Ⅱ Остановить</button>
  </div>
- <div class="status" id="status">Готово. Для работы страница должна быть открыта на переднем плане.</div>
+ <div class="grid2">
+  <button class="secondary" id="testFrame" disabled>⌕ Проверить область</button>
+  <button class="secondary" id="resetFrame">↺ Сбросить рамку</button>
+ </div>
+ <div class="progress" id="progress"><i></i></div>
+ <div class="status" id="status">Для камеры нужен HTTPS. Первый запуск OCR скачивает языковую модель.</div>
 </section>
 
 <section class="card">
- <div class="section-title">РАСПОЗНАВАНИЕ И ПЕРЕВОД</div>
+ <div class="section-title">2 · РАСПОЗНАННЫЙ ТЕКСТ И ПЕРЕВОД</div>
  <div class="transcript">
-  <div class="tag">ENGLISH · РАСПОЗНАННЫЙ ТЕКСТ</div>
-  <div class="source" id="sourceText">Здесь появятся субтитры из игры…</div>
-  <div class="tag">РУССКИЙ · ПЕРЕВОД</div>
-  <div class="translation" id="translatedText">Здесь появится перевод…</div>
+  <div class="tag">ENGLISH · SUBTITLE</div><div class="source" id="english">Ожидаю субтитры…</div>
+  <div class="tag">РУССКИЙ ПЕРЕВОД</div><div class="translation" id="russian">Перевод появится здесь…</div>
  </div>
  <div class="switchline"><span>Автоматически озвучивать перевод</span><input type="checkbox" id="autoSpeak" checked></div>
- <div class="switchline"><span>Показывать историю реплик</span><input type="checkbox" id="saveHistory" checked></div>
- <button class="wide" id="testVoice">🔊 Проверить русский голос</button>
+ <div class="switchline"><span>Сохранять историю реплик</span><input type="checkbox" id="keepHistory" checked></div>
+ <button class="wide secondary" id="voiceTest">🔊 Проверить русский голос и AirPods</button>
+ <div class="note">Перед запуском подключи AirPods к iPhone и нажми проверку голоса. PWA не может принудительно выбрать AirPods: вывод идёт на аудиоустройство, выбранное в iOS.</div>
 </section>
 
 <section class="card">
- <div class="section-title">НАСТРОЙКИ</div>
- <label for="voiceSelect">Голос iPhone</label><select id="voiceSelect"><option value="">Системный русский голос</option></select>
- <label for="rate">Скорость речи: <b id="rateVal">1.0×</b></label><input id="rate" type="range" min=".75" max="1.25" step=".05" value="1">
- <label for="interval">Частота проверки камеры</label><select id="interval"><option value="1800">Примерно раз в 1,8 секунды (бережно к батарее)</option><option value="2600">Раз в 2,6 секунды</option><option value="1200">Раз в 1,2 секунды (быстрее, нагрузка выше)</option></select>
- <label>Положение области субтитров</label>
- <label for="topRange">Верхняя граница: <b id="topVal">70%</b></label><input id="topRange" type="range" min="45" max="88" value="70">
- <label for="heightRange">Высота области: <b id="heightVal">22%</b></label><input id="heightRange" type="range" min="8" max="40" value="22">
- <div class="status">Зелёная рамка показывает, какую часть изображения анализирует OCR. Подстрой её под субтитры GTA.</div>
+ <div class="section-title">3 · НАСТРОЙКИ РАСПОЗНАВАНИЯ</div>
+ <label for="interval">Интервал проверки</label>
+ <select id="interval"><option value="2200">2,2 секунды · рекомендовано</option><option value="1500">1,5 секунды · быстрее, выше нагрузка</option><option value="3000">3 секунды · экономия батареи</option></select>
+ <div class="settings-grid">
+  <div><label for="voiceRate">Скорость голоса <span class="value" id="rateValue">1,0×</span></label><input id="voiceRate" type="range" min=".75" max="1.25" step=".05" value="1"></div>
+  <div><label for="confidence">Устойчивость текста</label><select id="confidence"><option value="2">2 совпадения</option><option value="3" selected>3 совпадения</option></select></div>
+ </div>
+ <label for="voiceSelect">Русский голос iPhone</label><select id="voiceSelect"><option value="">Автоматический русский голос</option></select>
+ <div class="note">Если OCR не видит субтитры: приблизь телефон, убери блики, увеличь размер субтитров в игре и передвинь рамку так, чтобы она охватывала весь текст, но не захватывала большую часть игрового изображения.</div>
 </section>
 
 <section class="card">
- <div class="section-title">ПОСЛЕДНИЕ РЕПЛИКИ</div>
+ <div class="section-title">4 · ТЕСТ ПЕРЕВОДА БЕЗ КАМЕРЫ</div>
+ <label for="manualText">Вставь английскую фразу для проверки</label>
+ <textarea id="manualText" placeholder="Например: I think we should get out of here!"></textarea>
+ <button class="wide primary" id="manualTranslate" style="margin-top:9px">Перевести и озвучить тест</button>
+ <div class="status" id="manualStatus"></div>
+</section>
+
+<section class="card">
+ <div class="section-title">5 · ИСТОРИЯ ДИАЛОГОВ</div>
  <div class="history" id="history"><div class="empty">История пока пуста.</div></div>
- <button class="wide" id="clearHistory" style="margin-top:10px">Очистить историю</button>
+ <button class="wide danger" id="clearHistory" style="margin-top:10px">Очистить историю</button>
 </section>
-<div class="foot">Распознавание выполняется на устройстве. Перевод отправляется в MyMemory через интернет. Бесплатный публичный сервис не гарантирует постоянную доступность, скорость или конфиденциальность. Не вводи сюда личную информацию.</div>
+
+<div class="foot">GTA Live Translator 1.1 · OCR выполняется на iPhone через Tesseract.js. Перевод использует публичный MyMemory API (анонимный лимит 5 000 символов в сутки). Интернет обязателен для загрузки OCR-модели и перевода. Приложение должно оставаться открытым на экране.</div>
 </main>
-<canvas id="cropCanvas"></canvas>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<canvas id="workCanvas" hidden></canvas>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script>
-(()=>{
+(()=> {
+'use strict';
 const $=id=>document.getElementById(id);
-const video=$('video'), canvas=$('cropCanvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
-let stream=null, worker=null, loopTimer=null, busy=false, lastRaw='', lastSpoken='', lastSeen=0, voices=[];
-let history=[];
-const status=(msg,error=false)=>{$('status').textContent=msg;$('status').classList.toggle('error',error)};
-const norm=s=>(s||'').replace(/[\r\n]+/g,' ').replace(/\s+/g,' ').replace(/[|]/g,'I').trim();
-function updateFrame(){ $('scanFrame').style.top=$('topRange').value+'%';$('scanFrame').style.height=$('heightRange').value+'%';$('topVal').textContent=$('topRange').value+'%';$('heightVal').textContent=$('heightRange').value+'%';}
-$('topRange').addEventListener('input',updateFrame);$('heightRange').addEventListener('input',updateFrame);updateFrame();
+const video=$('video'), preview=$('preview'), selection=$('selection'), canvas=$('workCanvas'), ctx=canvas.getContext('2d',{willReadFrequently:true});
+const state={stream:null,worker:null,loop:false,busy:false,stopped:false,voices:[],candidate:'',candidateCount:0,lastSent:'',lastSentAt:0,lastOcrAt:0,history:[],speechReady:false,scanTimer:null,translationBusy:false};
+const defaults={x:.05,y:.68,w:.90,h:.25};
+let rect={...defaults};
+const setStatus=(msg,type='')=>{$('status').textContent=msg;$('status').className='status '+type;};
+const setBadge=(msg,type='')=>{$('badge').textContent=msg;$('badge').className='pill '+type;};
+const progress=on=>$('progress').style.display=on?'block':'none';
+const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+function renderRect(){selection.style.left=(rect.x*100)+'%';selection.style.top=(rect.y*100)+'%';selection.style.width=(rect.w*100)+'%';selection.style.height=(rect.h*100)+'%';}
+function saveRect(){try{localStorage.setItem('gtaTranslatorRect',JSON.stringify(rect));}catch{}}
+try{const saved=JSON.parse(localStorage.getItem('gtaTranslatorRect')||'null');if(saved&&['x','y','w','h'].every(k=>Number.isFinite(saved[k])))rect=saved;}catch{}
+renderRect();
+
+function bindDrag(){
+ let mode='',startX=0,startY=0,startRect=null;
+ const down=(e,m)=>{if(!state.stream)return;e.preventDefault();mode=m;startX=e.clientX;startY=e.clientY;startRect={...rect};try{e.target.setPointerCapture(e.pointerId)}catch{}};
+ selection.addEventListener('pointerdown',e=>{if(e.target=== $('resizeHandle'))down(e,'resize');else down(e,'move');});
+ selection.addEventListener('pointermove',e=>{
+  if(!mode)return;e.preventDefault();
+  const b=preview.getBoundingClientRect(),dx=(e.clientX-startX)/b.width,dy=(e.clientY-startY)/b.height;
+  if(mode==='move'){rect.x=clamp(startRect.x+dx,0,1-rect.w);rect.y=clamp(startRect.y+dy,0,1-rect.h);}
+  else{rect.w=clamp(startRect.w+dx,.18,1-rect.x);rect.h=clamp(startRect.h+dy,.08,1-rect.y);}
+  renderRect();
+ });
+ const up=()=>{if(mode){mode='';saveRect();}};
+ selection.addEventListener('pointerup',up);selection.addEventListener('pointercancel',up);
+}
+bindDrag();
+$('resetFrame').onclick=()=>{rect={...defaults};renderRect();saveRect();setStatus('Область субтитров сброшена.');};
+
 function loadVoices(){
- voices=window.speechSynthesis? speechSynthesis.getVoices().filter(v=>/^ru(-|_)/i.test(v.lang)): [];
- const sel=$('voiceSelect'), old=sel.value; sel.innerHTML='<option value="">Системный русский голос</option>';
- voices.forEach((v,i)=>{let o=document.createElement('option');o.value=String(i);o.textContent=v.name+' · '+v.lang;sel.append(o)});
+ if(!('speechSynthesis'in window))return;
+ state.voices=speechSynthesis.getVoices().filter(v=>/^ru([_-]|$)/i.test(v.lang));
+ const sel=$('voiceSelect'),old=sel.value;sel.innerHTML='<option value="">Автоматический русский голос</option>';
+ state.voices.forEach((v,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=v.name+' · '+v.lang;sel.append(o);});
  if(old)sel.value=old;
 }
-if('speechSynthesis' in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
-function speak(text){
- if(!$('autoSpeak').checked || !('speechSynthesis' in window))return;
- speechSynthesis.cancel();
- const u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';u.rate=Number($('rate').value);
- const idx=$('voiceSelect').value;if(idx!==''&&voices[Number(idx)])u.voice=voices[Number(idx)];
- speechSynthesis.speak(u);
+if('speechSynthesis'in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices;}
+$('voiceRate').addEventListener('input',()=>$('rateValue').textContent=Number($('voiceRate').value).toFixed(2).replace('.',',')+'×');
+
+function speak(text,fromUser=false){
+ if(!('speechSynthesis'in window)){setStatus('Этот браузер не поддерживает синтез речи.','error');return false;}
+ if(!$('autoSpeak').checked&&!fromUser)return false;
+ try{
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang='ru-RU';u.rate=Number($('voiceRate').value);u.volume=1;
+  const ix=$('voiceSelect').value;if(ix!==''&&state.voices[Number(ix)])u.voice=state.voices[Number(ix)];
+  u.onstart=()=>{state.speechReady=true;setStatus('Озвучиваю русский перевод…','ok');};
+  u.onend=()=>{if(state.loop)setStatus('Слушаю субтитры…','ok');};
+  u.onerror=e=>{setStatus('Ошибка озвучки: '+(e.error||'голос недоступен')+'. Проверь звук iPhone и AirPods.','error');};
+  speechSynthesis.resume();speechSynthesis.speak(u);return true;
+ }catch(e){setStatus('Не удалось запустить голос: '+e.message,'error');return false;}
 }
-$('rate').addEventListener('input',()=>$('rateVal').textContent=Number($('rate').value).toFixed(2)+'×');
-$('testVoice').onclick=()=>{if(!('speechSynthesis'in window)){status('Синтез речи не поддерживается этим браузером.',true);return;}speak('Проверка русского голоса. Перевод диалогов готов к работе.');};
-function addHistory(en,ru){
- if(!$('saveHistory').checked)return;
- const item={en,ru,time:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'})};
- history.unshift(item);history=history.slice(0,30);
- $('history').innerHTML='';
- history.forEach(x=>{const d=document.createElement('div');d.className='history-item';const sm=document.createElement('small');sm.textContent=x.time;const a=document.createElement('div');a.textContent=x.en;const b=document.createElement('div');b.style.color='#8af0bd';b.style.marginTop='4px';b.textContent=x.ru;d.append(sm,a,b);$('history').append(d)});
+$('voiceTest').onclick=()=>{
+ const ok=speak('Проверка русского голоса. Если вы слышите эту фразу в AirPods, озвучка работает.',true);
+ if(ok)setStatus('Проверочная фраза отправлена в системный синтезатор речи.','ok');
+};
+
+function cleanText(s){
+ return (s||'').replace(/\r/g,' ').replace(/\n+/g,' ').replace(/[|]/g,'I').replace(/[^\p{L}\p{N}'’.,!?;:\- ]/gu,' ').replace(/\s+/g,' ').trim();
 }
-$('clearHistory').onclick=()=>{history=[];$('history').innerHTML='<div class="empty">История пока пуста.</div>';};
+function looksLikeSubtitle(s){
+ if(s.length<5||s.length>360)return false;
+ const letters=(s.match(/[A-Za-z]/g)||[]).length;
+ const words=s.split(/\s+/).filter(Boolean);
+ return letters>=4&&words.length>=1&&letters/Math.max(1,s.replace(/\s/g,'').length)>.38;
+}
 async function translate(text){
- const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=en|ru';
- const r=await fetch(url);if(!r.ok)throw new Error('Ошибка сервиса перевода: '+r.status);
- const j=await r.json();const result=j?.responseData?.translatedText;
- if(!result||j.responseStatus!==200)throw new Error(j?.responseDetails||'Перевод не получен');
- return result.replace(/&quot;/g,'"').replace(/&#39;/g,"'");
-}
-function validEnglish(s){
- if(s.length<5||!/[a-z]{2}/i.test(s))return false;
- const letters=(s.match(/[a-z]/gi)||[]).length;
- return letters/Math.max(1,s.replace(/\s/g,'').length)>.45;
-}
-async function processFrame(){
- if(busy||!stream||video.readyState<2||!worker)return;
- busy=true;
+ // MyMemory has a 500-byte source segment limit; split long OCR strings on word boundaries.
+ const encoder=new TextEncoder();
+ if(encoder.encode(text).length>470){
+  const words=text.split(/\s+/),chunks=[];let chunk='';
+  for(const word of words){const next=chunk?chunk+' '+word:word;if(encoder.encode(next).length>450&&chunk){chunks.push(chunk);chunk=word;}else chunk=next;}
+  if(chunk)chunks.push(chunk);
+  const out=[];for(const c of chunks)out.push(await translate(c));return out.join(' ');
+ }
+ const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=en|ru&mt=1';
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
  try{
-  const vw=video.videoWidth,vh=video.videoHeight;
-  const top=Number($('topRange').value)/100, h=Number($('heightRange').value)/100;
-  const sx=Math.round(vw*.05), sw=Math.round(vw*.90), sy=Math.round(vh*top), sh=Math.round(vh*h);
-  canvas.width=Math.min(1100,sw);canvas.height=Math.max(80,Math.round(sh*canvas.width/sw));
-  ctx.drawImage(video,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
-  const result=await worker.recognize(canvas);
-  let raw=norm(result.data.text).replace(/[^A-Za-z0-9'’.,!?;:\- ]/g,' ');
-  raw=norm(raw);
-  if(validEnglish(raw)){
-   const now=Date.now();
-   // Wait for the same subtitle to remain stable across at least two scans.
-   if(raw.toLowerCase()===lastRaw.toLowerCase() && now-lastSeen>300 && raw.toLowerCase()!==lastSpoken.toLowerCase()){
-    $('sourceText').textContent=raw;
-    status('Распознано. Перевожу…');
-    try{
-     const ru=await translate(raw);
-     $('translatedText').textContent=ru;
-     lastSpoken=raw;addHistory(raw,ru);speak(ru);
-     status('Перевод готов · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'}));
-    }catch(e){status('Не удалось перевести: '+e.message,true);}
-   }
-   lastRaw=raw;lastSeen=now;
-  } else if(Date.now()-lastSeen>5000){lastRaw='';}
- }catch(e){status('Ошибка распознавания: '+e.message,true);}
- finally{busy=false;}
-}
-async function start(){
- try{
-  if(!navigator.mediaDevices?.getUserMedia)throw new Error('Камера недоступна. Открой PWA по HTTPS в Safari.');
-  status('Запрашиваю доступ к камере…');
-  stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
-  video.srcObject=stream;await video.play();
-  $('video').style.display='block';$('placeholder').style.display='none';$('scanFrame').style.display='block';
-  $('startBtn').disabled=true;$('stopBtn').disabled=false;$('liveBadge').textContent='КАМЕРА ВКЛЮЧЕНА';$('liveBadge').classList.add('live');
-  status('Загружаю OCR. При первом запуске требуется интернет…');
-  if(!worker){
-   worker=await Tesseract.createWorker('eng',1,{logger:m=>{if(m.status==='recognizing text')status('Распознаю субтитры…');}});
+  const response=await fetch(url,{signal:controller.signal,headers:{'Accept':'application/json'}});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const data=await response.json();
+  if(Number(data.responseStatus)!==200||!data.responseData?.translatedText){
+   if(data.quotaFinished)throw new Error('исчерпан бесплатный лимит MyMemory');
+   throw new Error(data.responseDetails||'сервис не вернул перевод');
   }
-  status('Работаю. Наведи зелёную рамку на субтитры телевизора.');
-  loopTimer=setInterval(processFrame,Number($('interval').value));
- }catch(e){stop();status(e.message||'Не удалось запустить камеру.',true);}
+  return data.responseData.translatedText.replace(/&quot;/g,'"').replace(/&#39;/g,"'").trim();
+ }finally{clearTimeout(timer);}
 }
-function stop(){
- if(loopTimer){clearInterval(loopTimer);loopTimer=null;}
- if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
- video.srcObject=null;video.style.display='none';$('placeholder').style.display='block';$('scanFrame').style.display='none';
- $('startBtn').disabled=false;$('stopBtn').disabled=true;$('liveBadge').textContent='НЕ ЗАПУЩЕНО';$('liveBadge').classList.remove('live');
+function showResult(en,ru){
+ $('english').textContent=en;$('russian').textContent=ru;
+ if($('keepHistory').checked){
+  state.history.unshift({en,ru,time:new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})});
+  state.history=state.history.slice(0,35);renderHistory();
+ }
+ if($('autoSpeak').checked)speak(ru);
+}
+function renderHistory(){
+ const el=$('history');el.innerHTML='';
+ if(!state.history.length){el.innerHTML='<div class="empty">История пока пуста.</div>';return;}
+ state.history.forEach(item=>{
+  const wrap=document.createElement('div');wrap.className='history-item';
+  const time=document.createElement('small');time.textContent=item.time;
+  const en=document.createElement('div');en.textContent=item.en;
+  const ru=document.createElement('div');ru.className='ru';ru.textContent=item.ru;
+  wrap.append(time,en,ru);el.append(wrap);
+ });
+}
+$('clearHistory').onclick=()=>{state.history=[];renderHistory();};
+
+async function doTranslate(text,manual=false){
+ if(state.translationBusy)return;
+ state.translationBusy=true;
+ try{
+  if(manual)$('manualStatus').textContent='Перевожу…';else setStatus('Новая реплика обнаружена. Перевожу…');
+  const ru=await translate(text);
+  showResult(text,ru);
+  if(manual)$('manualStatus').textContent='Готово. Перевод показан выше и отправлен на озвучку.';
+  else setStatus('Перевод готов. Продолжаю распознавание.','ok');
+ }catch(e){
+  const msg='Перевод не выполнен: '+e.message;
+  if(manual)$('manualStatus').textContent=msg;else setStatus(msg,true);
+ }finally{state.translationBusy=false;}
+}
+$('manualTranslate').onclick=()=>{
+ const text=cleanText($('manualText').value);
+ if(!text){$('manualStatus').textContent='Введи английскую фразу.';return;}
+ // This button is a user gesture, so it also helps unlock speech on iOS.
+ doTranslate(text,true);
+};
+
+async function ensureWorker(){
+ if(state.worker)return;
+ if(!window.Tesseract)throw new Error('Не загрузилась библиотека OCR. Проверь интернет и обнови страницу.');
+ setStatus('Подготавливаю OCR-движок и загружаю английскую модель…');progress(true);
+ state.worker=await Tesseract.createWorker('eng',1,{
+  logger:m=>{if(m.status==='loading tesseract core')setStatus('Загружаю OCR-движок…');else if(m.status==='loading language traineddata')setStatus('Загружаю английскую модель OCR…');else if(m.status==='initializing tesseract')setStatus('Инициализирую распознавание…');}
+ });
+ await state.worker.setParameters({tessedit_pageseg_mode:Tesseract.PSM.SINGLE_BLOCK, preserve_interword_spaces:'1'});
+ progress(false);
+}
+function drawCrop(){
+ const vw=video.videoWidth,vh=video.videoHeight;
+ const sx=Math.round(rect.x*vw),sy=Math.round(rect.y*vh),sw=Math.max(1,Math.round(rect.w*vw)),sh=Math.max(1,Math.round(rect.h*vh));
+ // Upscale crop for small TV subtitles; keep dimensions moderate for iPhone.
+ const scale=Math.min(2.2,Math.max(1,1100/sw));
+ canvas.width=Math.round(sw*scale);canvas.height=Math.round(sh*scale);
+ ctx.drawImage(video,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+ // Increase contrast and convert to grayscale to help OCR on outlined subtitles.
+ const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;
+ for(let i=0;i<d.length;i+=4){const gray=.299*d[i]+.587*d[i+1]+.114*d[i+2];const v=gray>145?255:Math.max(0,Math.min(255,(gray-90)*2.2));d[i]=d[i+1]=d[i+2]=v;}
+ ctx.putImageData(img,0,0);
+}
+async function scanOnce(){
+ if(!state.loop||state.busy||!state.worker||!state.stream||video.readyState<2)return;
+ state.busy=true;
+ try{
+  drawCrop();
+  const {data}=await state.worker.recognize(canvas);
+  const text=cleanText(data.text);
+  if(looksLikeSubtitle(text)){
+   if(text.toLowerCase()===state.candidate.toLowerCase())state.candidateCount++;
+   else{state.candidate=text;state.candidateCount=1;}
+   $('english').textContent=text;
+   const required=Number($('confidence').value);
+   if(state.candidateCount>=required&&!state.translationBusy){
+    const key=text.toLowerCase(),now=Date.now();
+    if(key!==state.lastSent.toLowerCase()||now-state.lastSentAt>12000){
+     state.lastSent=text;state.lastSentAt=now;await doTranslate(text,false);
+    }
+   }else setStatus('Распознано. Проверяю устойчивость текста ('+state.candidateCount+'/'+required+')…');
+  }else{
+   state.candidate='';state.candidateCount=0;
+   if(!text)setStatus('Слушаю субтитры… Наведи рамку точно на текст.');
+  }
+ }catch(e){setStatus('Ошибка OCR: '+e.message,true);}
+ finally{state.busy=false;}
+}
+async function scanLoop(){
+ if(!state.loop)return;
+ await scanOnce();
+ if(state.loop)state.scanTimer=setTimeout(scanLoop,Number($('interval').value));
+}
+async function startCamera(){
+ if(state.loop)return;
+ try{
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('Камера недоступна. Открой приложение по HTTPS в Safari.');
+  // iOS speech synthesis should be activated directly from the Start tap.
+  if('speechSynthesis'in window){speechSynthesis.cancel();const prime=new SpeechSynthesisUtterance(' ');prime.lang='ru-RU';prime.volume=0;speechSynthesis.speak(prime);speechSynthesis.resume();}
+  setStatus('Запрашиваю доступ к задней камере…');
+  state.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}}});
+  video.srcObject=state.stream;await video.play();
+  $('placeholder').classList.add('hidden');video.style.display='block';selection.style.display='block';
+  await ensureWorker();
+  state.loop=true;state.stopped=false;
+  $('start').disabled=true;$('stop').disabled=false;$('testFrame').disabled=false;
+  setBadge('КАМЕРА АКТИВНА','live');setStatus('Работаю. Перемести зелёную рамку на субтитры телевизора.','ok');
+  scanLoop();
+ }catch(e){
+  stopCamera();
+  setStatus('Не удалось запустить: '+(e.message||e.name||'неизвестная ошибка'), 'error');
+ }
+}
+function stopCamera(){
+ state.loop=false;if(state.scanTimer)clearTimeout(state.scanTimer);state.scanTimer=null;
+ if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
+ video.pause();video.srcObject=null;video.style.display='none';selection.style.display='none';$('placeholder').classList.remove('hidden');
+ $('start').disabled=false;$('stop').disabled=true;$('testFrame').disabled=true;setBadge('ОСТАНОВЛЕНО');
  if('speechSynthesis'in window)speechSynthesis.cancel();
- status('Остановлено.');
+ setStatus('Камера остановлена.');
 }
-$('startBtn').onclick=start;$('stopBtn').onclick=stop;
-$('interval').addEventListener('change',()=>{if(stream&&loopTimer){clearInterval(loopTimer);loopTimer=setInterval(processFrame,Number($('interval').value));}});
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&stream){status('Приложение свернуто. iOS может приостановить камеру и обработку.',true);}});
-if('serviceWorker'in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+$('start').onclick=startCamera;$('stop').onclick=stopCamera;
+$('testFrame').onclick=async()=>{if(!state.stream)return;await scanOnce();if(!state.busy)setStatus('Проверка области завершена. Если текста нет — подстрой рамку и попробуй ещё раз.');};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&state.loop)setStatus('Приложение свернуто. iOS может приостановить камеру и распознавание. Вернись в приложение.','error');});
+window.addEventListener('pagehide',stopCamera);
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW',e)));
 })();
 </script>
 </body></html>
