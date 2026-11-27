@@ -25,7 +25,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
 <body>
 <main>
 <header class="top">
- <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.4</div></div></div>
+ <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.5</div></div></div>
  <span class="pill" id="badge">ГОТОВ</span>
 </header>
 
@@ -46,7 +46,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
   <button class="secondary" id="resetFrame">↺ Сбросить рамку</button>
  </div>
  <div class="progress" id="progress"><i></i></div>
- <div class="status" id="status">Для камеры нужен HTTPS. Первый запуск скачивает модели OCR (rus+eng).</div>
+ <div class="status" id="status">Для камеры нужен HTTPS. Первый запуск скачивает модель OCR. Держи телефон неподвижно.</div>
 </section>
 
 <section class="card">
@@ -76,16 +76,23 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
    <input id="voiceRate" type="range" min=".75" max="1.4" step=".05" value="1">
   </div>
   <div>
-   <label for="confidence">Устойчивость</label>
+   <label for="confidence">Устойчивость (совпадения подряд)</label>
    <select id="confidence">
-    <option value="2" selected>2 совпадения</option>
-    <option value="3">3 совпадения</option>
+    <option value="1">1 — быстро, возможны ошибки</option>
+    <option value="2" selected>2 — баланс (рекомендуется)</option>
+    <option value="3">3 — медленнее, стабильнее</option>
    </select>
   </div>
  </div>
+ <label for="ocrLang">Язык распознавания OCR</label>
+ <select id="ocrLang">
+  <option value="rus" selected>Только русский</option>
+  <option value="rus+eng">Русский + английский</option>
+  <option value="eng">Только английский</option>
+ </select>
  <label for="voiceSelect">Голос iPhone</label>
  <select id="voiceSelect"><option value="">Авто (русский приоритет)</option></select>
- <div class="note">OCR понимает и русские, и английские буквы одновременно.</div>
+ <div class="note"><b>Про задержку:</b> «2 совпадения» значит: один и тот же текст должен распознаться 2 раза подряд. Это защита от дрожания камеры и шума OCR. Если телефон трясётся — текст каждый раз чуть другой, счётчик сбрасывается и приходится ждать заново. Ставь штатив или упор, устойчивость = 1 для минимальной задержки.</div>
 </section>
 
 <section class="card">
@@ -102,7 +109,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
  <button class="wide danger" id="clearHistory" style="margin-top:10px">Очистить</button>
 </section>
 
-<div class="foot">GTA Live Reader 1.4 · OCR: Tesseract.js (rus+eng) · Озвучка: системный голос iOS · Интернет нужен только для первой загрузки моделей</div>
+<div class="foot">GTA Live Reader 1.5 · OCR: Tesseract.js (rus+eng) · Озвучка: системный голос iOS · Интернет нужен только для первой загрузки моделей</div>
 </main>
 <canvas id="workCanvas" hidden></canvas>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
@@ -149,6 +156,7 @@ function loadSettings(){
   if(s.keepHistory!=null)$('keepHistory').checked=!!s.keepHistory;
   if(s.interval)$('interval').value=s.interval;
   if(s.confidence)$('confidence').value=s.confidence;
+  if(s.ocrLang)$('ocrLang').value=s.ocrLang;
   if(s.voiceRate){
    $('voiceRate').value=s.voiceRate;
    $('rateValue').textContent=Number(s.voiceRate).toFixed(2).replace('.',',')+'×';
@@ -163,12 +171,13 @@ function saveSettings(){
    keepHistory:$('keepHistory').checked,
    interval:$('interval').value,
    confidence:$('confidence').value,
+   ocrLang:$('ocrLang').value,
    voiceRate:$('voiceRate').value,
    history:$('keepHistory').checked?state.history:[]
   }));
  }catch{}
 }
-['autoSpeak','keepHistory','interval','confidence'].forEach(id=>$(id).addEventListener('change',saveSettings));
+['autoSpeak','keepHistory','interval','confidence','ocrLang'].forEach(id=>$(id).addEventListener('change',saveSettings));
 $('voiceRate').addEventListener('input',()=>{
  $('rateValue').textContent=Number($('voiceRate').value).toFixed(2).replace('.',',')+'×';
  saveSettings();
@@ -333,6 +342,28 @@ function looksLikeSubtitle(s){
  const words=s.split(/\s+/).filter(Boolean);
  return letters>=3&&words.length>=1&&letters/Math.max(1,s.replace(/\s/g,'').length)>0.28;
 }
+// Soft compare: ignore case, extra spaces, common OCR noise so small shake doesn't reset
+function normKey(s){
+ return String(s||'').toLowerCase()
+  .replace(/[«»„“"'`]/g,'')
+  .replace(/[^\p{L}\p{N}]+/gu,' ')
+  .replace(/\s+/g,' ')
+  .trim();
+}
+function similarText(a,b){
+ a=normKey(a);b=normKey(b);
+ if(!a||!b)return false;
+ if(a===b)return true;
+ // allow small differences (1-2 chars) for shake/OCR noise
+ if(Math.abs(a.length-b.length)>3)return false;
+ let i=0,j=0,diff=0;
+ while(i<a.length&&j<b.length){
+  if(a[i]===b[j]){i++;j++;continue;}
+  diff++;if(diff>2)return false;
+  if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++;}
+ }
+ return diff + (a.length-i) + (b.length-j) <= 2;
+}
 
 function showAndSpeak(text){
  $('recognized').textContent=text;
@@ -367,14 +398,28 @@ $('manualSpeak').onclick=()=>{
 };
 
 // ========== OCR rus+eng ==========
-async function ensureWorker(){
- if(state.worker)return;
+function getOcrLangs(){
+ const v=$('ocrLang').value||'rus';
+ if(v==='eng')return ['eng'];
+ if(v==='rus+eng')return ['rus','eng'];
+ return ['rus'];
+}
+
+async function ensureWorker(forceReload=false){
+ const langs=getOcrLangs();
+ const key=langs.join('+');
+ if(state.worker && state.workerLangKey===key && !forceReload)return;
+ if(state.worker){
+  try{await state.worker.terminate();}catch{}
+  state.worker=null;
+ }
  if(!window.Tesseract)throw new Error('OCR библиотека не загрузилась. Проверь интернет.');
- setStatus('Загружаю OCR-модели (русский + английский)…');progress(true);
- state.worker=await Tesseract.createWorker(['rus','eng'],1,{
+ const label=langs.join(' + ');
+ setStatus('Загружаю OCR-модель ('+label+')…');progress(true);
+ state.worker=await Tesseract.createWorker(langs,1,{
   logger:m=>{
    if(m.status==='loading tesseract core')setStatus('Загружаю движок OCR…');
-   else if(m.status==='loading language traineddata')setStatus('Загружаю модели rus+eng (один раз)…');
+   else if(m.status==='loading language traineddata')setStatus('Загружаю модель '+label+'…');
    else if(m.status==='initializing tesseract')setStatus('Инициализация…');
   }
  });
@@ -382,8 +427,21 @@ async function ensureWorker(){
   tessedit_pageseg_mode:Tesseract.PSM.SINGLE_BLOCK,
   preserve_interword_spaces:'1'
  });
+ state.workerLangKey=key;
  progress(false);
 }
+
+// Recreate worker when user changes OCR language (if camera already running)
+$('ocrLang').addEventListener('change',async()=>{
+ saveSettings();
+ if(!state.loop)return;
+ try{
+  setStatus('Меняю язык OCR…');
+  await ensureWorker(true);
+  state.candidate='';state.candidateCount=0;
+  setStatus('Язык OCR обновлён. Продолжаю.','ok');
+ }catch(e){setStatus('Не удалось сменить язык OCR: '+(e.message||e),'error');}
+});
 
 function drawCrop(){
  const vw=video.videoWidth,vh=video.videoHeight;
@@ -410,19 +468,19 @@ async function scanOnce(){
   const {data}=await state.worker.recognize(canvas);
   const text=cleanText(data.text);
   if(looksLikeSubtitle(text)){
-   if(text.toLowerCase()===state.candidate.toLowerCase())state.candidateCount++;
+   if(similarText(text,state.candidate))state.candidateCount++;
    else{state.candidate=text;state.candidateCount=1;}
    $('recognized').textContent=text;
    const need=Number($('confidence').value)||2;
    if(state.candidateCount>=need){
-    const key=text.toLowerCase(),now=Date.now();
-    if(key!==state.lastSpoken.toLowerCase()||now-state.lastSpokenAt>14000){
+    const now=Date.now();
+    if(!similarText(text,state.lastSpoken)||now-state.lastSpokenAt>14000){
      state.lastSpoken=text;
      state.lastSpokenAt=now;
      showAndSpeak(text);
     }
    }else{
-    setStatus('Распознано. Устойчивость '+state.candidateCount+'/'+need+'…');
+    setStatus('Жду устойчивости: '+state.candidateCount+'/'+need+' (тряска камеры сбрасывает счётчик)');
    }
   }else{
    state.candidate='';state.candidateCount=0;
