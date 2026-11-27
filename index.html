@@ -19,18 +19,27 @@ main{max-width:760px;margin:0 auto}.top{display:flex;align-items:center;justify-
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}button{border:0;border-radius:12px;padding:12px 10px;font-weight:750;color:white;background:var(--panel2);font-size:13px;min-height:43px}button.primary{background:#176c49}button.secondary{background:#263247}button.danger{background:#452630;color:#ffc0c9}button.speak-now{background:#0d5c3a;font-size:15px;min-height:52px;display:none}button:disabled{opacity:.42}.wide{width:100%}.status{font-size:12px;line-height:1.4;color:var(--muted);margin-top:10px;min-height:17px}.status.error{color:#ff9aaa}.status.ok{color:#7de6b1}
 .transcript{background:#0e1420;border:1px solid #202b3c;border-radius:14px;padding:13px;min-height:90px}.tag{font-size:9px;color:#8d9bb1;letter-spacing:1px;font-weight:850}.source{color:#8af0b9;margin:7px 0 0;line-height:1.4;min-height:28px;font-size:18px;font-weight:700;overflow-wrap:anywhere}.switchline{display:flex;justify-content:space-between;align-items:center;color:#e0e6f0;font-size:13px;padding:9px 1px}.switchline input{accent-color:var(--green);width:19px;height:19px}
 label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[type=range]{width:100%;accent-color:var(--green)}select,textarea{width:100%;background:var(--panel2);border:1px solid var(--line);color:white;border-radius:11px;padding:11px;font-size:14px}textarea{min-height:65px;resize:vertical}.value{color:#eaf3ee;font-weight:800}.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.history{max-height:220px;overflow:auto}.history-item{border-top:1px solid var(--line);padding:10px 0}.history-item small{display:block;color:var(--muted);margin-bottom:4px}.history-item div{line-height:1.35;overflow-wrap:anywhere;color:#8af0b9}.empty{color:#758198;font-size:13px;padding:8px 0}.foot{font-size:10px;color:#77849a;line-height:1.5;text-align:center;padding:9px 5px 4px}.note{background:#242a38;border-radius:11px;padding:10px 11px;color:#b7c2d4;font-size:11px;line-height:1.45;margin-top:10px}.note b{color:#fff}.progress{height:4px;background:#283246;border-radius:99px;overflow:hidden;margin-top:10px;display:none}.progress>i{display:block;height:100%;width:35%;background:var(--green);animation:move 1.2s infinite ease-in-out alternate}@keyframes move{from{transform:translateX(-10%)}to{transform:translateX(190%)}}.hidden{display:none!important}
+.section-title{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.section-title .chev{color:var(--muted);font-size:12px;transition:transform .2s}
+.card.collapsed .card-body{display:none}
+.card:not(.collapsed) .chev{transform:rotate(90deg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel2);color:#d5deee;border-radius:99px;padding:7px 11px;font-size:12px;font-weight:700}
+.chip.active{border-color:var(--green);color:#8af0b9;background:#123e2c}
+.mini{font-size:11px;color:var(--muted);margin-top:6px}
 @media(max-width:380px){body{padding-left:9px;padding-right:9px}.card{padding:11px}.grid2 button{font-size:12px}.source{font-size:16px}}
 </style>
 </head>
 <body>
 <main>
 <header class="top">
- <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.6</div></div></div>
+ <div class="brand"><div class="logo">🔊</div><div>GTA LIVE<div class="subbrand">READER · 1.8</div></div></div>
  <span class="pill" id="badge">ГОТОВ</span>
 </header>
 
 <section class="card">
- <div class="section-title">1 · КАМЕРА И ОБЛАСТЬ СУБТИТРОВ</div>
+ <div class="section-title">1 · КАМЕРА И ОБЛАСТЬ СУБТИТРОВ<span class="chev">▸</span></div>
+ <div class="card-body">
  <div class="preview" id="preview">
   <video id="video" autoplay muted playsinline></video>
   <div class="placeholder" id="placeholder">▣<strong>Камера ещё не включена</strong>Поставь iPhone напротив телевизора.<br>После запуска передвинь зелёную рамку на субтитры.</div>
@@ -45,14 +54,20 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
   <button class="secondary" id="testFrame" disabled>⌕ Проверить область</button>
   <button class="secondary" id="resetFrame">↺ Сбросить рамку</button>
  </div>
+ <div class="grid2">
+  <button class="secondary" id="pauseScan" disabled>⏸ Пауза распознавания</button>
+  <button class="secondary" id="copyText">📋 Копировать текст</button>
+ </div>
  <div class="progress" id="progress"><i></i></div>
  <div class="status" id="status">Для камеры нужен HTTPS. Первый запуск скачивает модель OCR. Держи телефон неподвижно.</div>
+</div>
 </section>
 
 <section class="card">
- <div class="section-title">2 · РАСПОЗНАННЫЙ ТЕКСТ И ОЗВУЧКА</div>
+ <div class="section-title">2 · РАСПОЗНАННЫЙ ТЕКСТ И ОЗВУЧКА<span class="chev">▸</span></div>
+ <div class="card-body">
  <div class="transcript">
-  <div class="tag">СУБТИТРЫ (RU / EN)</div>
+  <div class="tag">СУБТИТРЫ (RU / EN) · <span id="speakerBadge" style="color:#7df0b7">—</span></div>
   <div class="source" id="recognized">Ожидаю субтитры…</div>
  </div>
  <button class="wide speak-now" id="speakNow">🔊 НАЖМИ — ОЗВУЧИТЬ СЕЙЧАС</button>
@@ -60,64 +75,104 @@ label{display:block;color:var(--muted);font-size:12px;margin:13px 0 6px}input[ty
  <div class="switchline"><span>Сохранять историю</span><input type="checkbox" id="keepHistory" checked></div>
  <button class="wide secondary" id="voiceTest">🔊 Разблокировать голос (обязательно)</button>
  <div class="note"><b>Важно для iPhone:</b> сначала нажми «Разблокировать голос». Без этого iOS часто блокирует автоматическую озвучку. Если авто не сработает — появится большая кнопка «Озвучить сейчас».</div>
+</div>
 </section>
 
-<section class="card">
- <div class="section-title">3 · НАСТРОЙКИ</div>
+<section class="card collapsed">
+ <div class="section-title">3 · НАСТРОЙКИ<span class="chev">▸</span></div>
+ <div class="card-body">
+ <div class="mini">Быстрые профили</div>
+ <div class="chips" id="modeChips">
+  <button type="button" class="chip" data-mode="fast">Быстрый</button>
+  <button type="button" class="chip active" data-mode="balanced">Баланс</button>
+  <button type="button" class="chip" data-mode="stable">Стабильный</button>
+ </div>
  <label for="interval">Интервал проверки</label>
  <select id="interval">
-  <option value="1600">1,6 сек · быстрее</option>
+  <option value="1400">1,4 сек</option>
+  <option value="1600">1,6 сек</option>
   <option value="2000" selected>2 сек · рекомендовано</option>
-  <option value="2800">2,8 сек · экономия</option>
+  <option value="2800">2,8 сек</option>
  </select>
  <div class="settings-grid">
   <div>
-   <label for="voiceRate">Скорость <span class="value" id="rateValue">1,0×</span></label>
+   <label for="voiceRate">Скорость речи <span class="value" id="rateValue">1,0×</span></label>
    <input id="voiceRate" type="range" min=".75" max="1.4" step=".05" value="1">
   </div>
   <div>
-   <label for="confidence">Устойчивость (совпадения подряд)</label>
+   <label for="voiceVol">Громкость <span class="value" id="volValue">1,0</span></label>
+   <input id="voiceVol" type="range" min=".3" max="1" step=".05" value="1">
+  </div>
+ </div>
+ <div class="settings-grid">
+  <div>
+   <label for="confidence">Устойчивость</label>
    <select id="confidence">
-    <option value="1">1 — быстро, возможны ошибки</option>
-    <option value="2" selected>2 — баланс (рекомендуется)</option>
-    <option value="3">3 — медленнее, стабильнее</option>
+    <option value="1">1 — быстро</option>
+    <option value="2" selected>2 — баланс</option>
+    <option value="3">3 — стабильно</option>
+   </select>
+  </div>
+  <div>
+   <label for="ocrLang">Язык OCR</label>
+   <select id="ocrLang">
+    <option value="rus" selected>Только русский</option>
+    <option value="rus+eng">Русский + английский</option>
+    <option value="eng">Только английский</option>
    </select>
   </div>
  </div>
- <label for="ocrLang">Язык распознавания OCR</label>
- <select id="ocrLang">
-  <option value="rus" selected>Только русский</option>
-  <option value="rus+eng">Русский + английский</option>
-  <option value="eng">Только английский</option>
- </select>
- <label for="voiceSelect">Голос iPhone</label>
- <select id="voiceSelect"><option value="">Авто (русский приоритет)</option></select>
- <div class="note"><b>Про задержку:</b> «2 совпадения» значит: один и тот же текст должен распознаться 2 раза подряд. Это защита от дрожания камеры и шума OCR. Если телефон трясётся — текст каждый раз чуть другой, счётчик сбрасывается и приходится ждать заново. Ставь штатив или упор, устойчивость = 1 для минимальной задержки.</div>
+ <label for="contrast">Контраст OCR <span class="value" id="contrastValue">норма</span></label>
+ <input id="contrast" type="range" min="0" max="2" step="1" value="1">
+ <label for="voiceSelect">Голос по умолчанию</label>
+ <select id="voiceSelect"><option value="">Авто</option></select>
+ <div class="mini">Пресеты рамки</div>
+ <div class="chips">
+  <button type="button" class="chip" id="frameBottom">Низ экрана</button>
+  <button type="button" class="chip" id="frameWide">Широкая</button>
+  <button type="button" class="chip" id="frameCenter">Центр</button>
+ </div>
+ <div class="note">На iPhone часто только «Милена». Персонажей различаем <b>тембром</b>. Контраст OCR — если буквы бледные. «2 совпадения» = защита от тряски камеры.</div>
+</div>
 </section>
 
-<section class="card">
- <div class="section-title">4 · ТЕСТ ГОЛОСА</div>
+<section class="card collapsed">
+ <div class="section-title">4 · ТЕСТ ГОЛОСА<span class="chev">▸</span></div>
+ <div class="card-body">
  <label for="manualText">Фраза для проверки</label>
  <textarea id="manualText" placeholder="Например: Привет, это проверка озвучки субтитров!"></textarea>
  <button class="wide primary" id="manualSpeak" style="margin-top:9px">Озвучить тест</button>
  <div class="status" id="manualStatus"></div>
+</div>
 </section>
 
-<section class="card">
- <div class="section-title">5 · ГОЛОСА ПЕРСОНАЖЕЙ</div>
- <div class="switchline"><span>Разные голоса по имени (Люсия:, Джексон:)</span><input type="checkbox" id="useSpeakers" checked></div>
- <div class="switchline"><span>Не произносить имя вслух (только реплику)</span><input type="checkbox" id="skipName" checked></div>
- <div id="speakerList" class="history" style="max-height:180px;margin-top:8px"><div class="empty">Пока нет персонажей. Они появятся из субтитров вида «Имя: текст».</div></div>
- <div class="note">Если в субтитрах есть <b>Имя:</b> или <b>Имя —</b>, приложение запомнит персонажа и назначит голос/тон. Можно сменить вручную. На iPhone разных русских голосов мало — тогда различаем pitch (выше/ниже).</div>
+<section class="card collapsed">
+ <div class="section-title">5 · ГОЛОСА ПЕРСОНАЖЕЙ<span class="chev">▸</span></div>
+ <div class="card-body">
+ <div class="switchline"><span>Разные голоса / тембр по имени</span><input type="checkbox" id="useSpeakers" checked></div>
+ <div class="switchline"><span>Не произносить имя вслух</span><input type="checkbox" id="skipName" checked></div>
+ <div class="switchline"><span>Не перебивать: ждать конца фразы</span><input type="checkbox" id="waitSpeech" checked></div>
+ <div id="speakerList" class="history" style="max-height:200px;margin-top:8px"><div class="empty">Пока нет персонажей. Появятся из субтитров «Имя: текст».</div></div>
+ <div class="grid2" style="margin-top:8px">
+  <button class="secondary" id="resetSpeakers">Сбросить персонажей</button>
+  <button class="secondary" id="replayLast">↻ Повторить последнюю</button>
+ </div>
+ <div class="note"><b>iPhone:</b> Safari часто показывает только «Милена», даже если в настройках установлено больше голосов — это ограничение WebKit, не бага приложения. Поэтому для каждого персонажа задаём <b>тембр (pitch)</b>: ниже = мужской, выше = женский. Можно вручную выбрать пресет у каждого имени.</div>
+</div>
 </section>
 
-<section class="card">
- <div class="section-title">6 · ИСТОРИЯ</div>
+<section class="card collapsed">
+ <div class="section-title">6 · ИСТОРИЯ<span class="chev">▸</span></div>
+ <div class="card-body">
  <div class="history" id="history"><div class="empty">История пуста.</div></div>
- <button class="wide danger" id="clearHistory" style="margin-top:10px">Очистить</button>
+ <div class="grid2" style="margin-top:10px">
+  <button class="secondary" id="exportHistory">⬇ Экспорт</button>
+  <button class="danger" id="clearHistory">Очистить</button>
+ </div>
+</div>
 </section>
 
-<div class="foot">GTA Live Reader 1.6 · OCR + озвучка по персонажам · Системные голоса iOS · Модель OCR качается один раз</div>
+<div class="foot">GTA Live Reader 1.8 · OCR + озвучка по персонажам · Системные голоса iOS · Модель OCR качается один раз</div>
 </main>
 <canvas id="workCanvas" hidden></canvas>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
@@ -133,7 +188,7 @@ const state={
  voices:[], allVoices:[], candidate:'', candidateCount:0,
  lastSpoken:'', lastSpokenAt:0, history:[],
  speechUnlocked:false, scanTimer:null,
- wakeLock:null, pendingText:'', speaking:false,
+ wakeLock:null, pendingText:'', speaking:false, paused:false,
  speakers:{}, // name -> {voiceIndex, pitch, rate}
  speakerOrder:[]
 };
@@ -176,6 +231,7 @@ function loadSettings(){
   if(Array.isArray(s.speakerOrder))state.speakerOrder=s.speakerOrder;
   if(s.useSpeakers!=null)$('useSpeakers').checked=!!s.useSpeakers;
   if(s.skipName!=null)$('skipName').checked=!!s.skipName;
+  if(s.waitSpeech!=null&&$('waitSpeech'))$('waitSpeech').checked=!!s.waitSpeech;
   renderSpeakers();
  }catch{}
 }
@@ -192,11 +248,12 @@ function saveSettings(){
    speakers:state.speakers,
    speakerOrder:state.speakerOrder,
    useSpeakers:$('useSpeakers').checked,
-   skipName:$('skipName').checked
+   skipName:$('skipName').checked,
+   waitSpeech:$('waitSpeech')?$('waitSpeech').checked:true
   }));
  }catch{}
 }
-['autoSpeak','keepHistory','interval','confidence','ocrLang','useSpeakers','skipName'].forEach(id=>$(id).addEventListener('change',saveSettings));
+['autoSpeak','keepHistory','interval','confidence','ocrLang','useSpeakers','skipName','waitSpeech'].forEach(id=>$(id).addEventListener('change',saveSettings));
 $('voiceRate').addEventListener('input',()=>{
  $('rateValue').textContent=Number($('voiceRate').value).toFixed(2).replace('.',',')+'×';
  saveSettings();
@@ -251,18 +308,28 @@ function parseSpeaker(text){
   return {name, line};
 }
 
-const PITCH_CYCLE=[1.0, 1.15, 0.88, 1.25, 0.8, 1.08, 0.92];
-const RATE_CYCLE=[1.0, 1.05, 0.95, 1.1, 0.9];
+// Noticeable pitch steps so characters differ even with one iOS voice (Milena)
+const TIMBRE_PRESETS=[
+  {label:'Нейтральный', pitch:1.00, rateMul:1.00},
+  {label:'Женский выше', pitch:1.22, rateMul:1.04},
+  {label:'Мужской ниже', pitch:0.78, rateMul:0.96},
+  {label:'Выше и быстрее', pitch:1.30, rateMul:1.10},
+  {label:'Ниже и медленнее', pitch:0.72, rateMul:0.90},
+  {label:'Мягкий', pitch:1.12, rateMul:0.94},
+  {label:'Жёсткий', pitch:0.85, rateMul:1.06}
+];
 
 function ensureSpeaker(name){
   const key=name.toLowerCase();
   if(state.speakers[key])return state.speakers[key];
   const idx=state.speakerOrder.length;
+  const preset=TIMBRE_PRESETS[idx % TIMBRE_PRESETS.length];
   const conf={
     display:name,
-    voiceIndex: state.voices.length ? (idx % state.voices.length) : -1,
-    pitch: PITCH_CYCLE[idx % PITCH_CYCLE.length],
-    rateMul: RATE_CYCLE[idx % RATE_CYCLE.length]
+    voiceIndex: state.voices.length>1 ? (idx % state.voices.length) : -1,
+    pitch: preset.pitch,
+    rateMul: preset.rateMul,
+    timbre: idx % TIMBRE_PRESETS.length
   };
   state.speakers[key]=conf;
   state.speakerOrder.push(key);
@@ -276,47 +343,86 @@ function renderSpeakers(){
   if(!el)return;
   el.innerHTML='';
   if(!state.speakerOrder.length){
-    el.innerHTML='<div class="empty">Пока нет персонажей. Они появятся из субтитров вида «Имя: текст».</div>';
+    el.innerHTML='<div class="empty">Пока нет персонажей. Появятся из субтитров «Имя: текст».</div>';
     return;
   }
   state.speakerOrder.forEach(key=>{
     const conf=state.speakers[key];
     if(!conf)return;
-    const row=document.createElement('div');
-    row.className='history-item';
-    row.style.display='grid';
-    row.style.gridTemplateColumns='1fr 1.2fr auto';
-    row.style.gap='8px';
-    row.style.alignItems='center';
+    const wrap=document.createElement('div');
+    wrap.className='history-item';
+    const top=document.createElement('div');
+    top.style.display='flex';
+    top.style.justifyContent='space-between';
+    top.style.alignItems='center';
+    top.style.gap='8px';
+    top.style.marginBottom='6px';
     const nameEl=document.createElement('div');
-    nameEl.style.fontWeight='700';
+    nameEl.style.fontWeight='750';
     nameEl.style.color='#8af0b9';
     nameEl.textContent=conf.display;
-    const sel=document.createElement('select');
-    sel.innerHTML='<option value="-1">Авто + pitch '+conf.pitch.toFixed(2)+'</option>';
+    const testBtn=document.createElement('button');
+    testBtn.className='secondary';
+    testBtn.style.minHeight='34px';
+    testBtn.style.padding='6px 12px';
+    testBtn.textContent='▶ Тест';
+    testBtn.onclick=()=>{
+      primeSpeech();
+      doSpeak('Это голос персонажа '+conf.display, true, conf);
+    };
+    top.append(nameEl, testBtn);
+
+    const timbreSel=document.createElement('select');
+    TIMBRE_PRESETS.forEach((pr,i)=>{
+      const o=document.createElement('option');
+      o.value=String(i);
+      o.textContent=pr.label+' (pitch '+pr.pitch.toFixed(2)+')';
+      if(Number(conf.timbre)===i || (conf.timbre==null && Math.abs(conf.pitch-pr.pitch)<0.02))o.selected=true;
+      timbreSel.append(o);
+    });
+    timbreSel.onchange=()=>{
+      const pr=TIMBRE_PRESETS[Number(timbreSel.value)]||TIMBRE_PRESETS[0];
+      conf.timbre=Number(timbreSel.value);
+      conf.pitch=pr.pitch;
+      conf.rateMul=pr.rateMul;
+      saveSettings();
+    };
+
+    const voiceSel=document.createElement('select');
+    voiceSel.style.marginTop='6px';
+    const autoO=document.createElement('option');
+    autoO.value='-1';
+    autoO.textContent=state.voices.length<=1 ? 'Системный голос (Милена и т.п.)' : 'Авто из списка';
+    voiceSel.append(autoO);
     state.voices.forEach((v,i)=>{
       const o=document.createElement('option');
       o.value=String(i);
-      o.textContent=v.name.split(' ')[0]+' · '+v.lang;
+      o.textContent=v.name+' · '+v.lang;
       if(Number(conf.voiceIndex)===i)o.selected=true;
-      sel.append(o);
+      voiceSel.append(o);
     });
-    sel.onchange=()=>{
-      conf.voiceIndex=Number(sel.value);
-      saveSettings();
-    };
-    const testBtn=document.createElement('button');
-    testBtn.className='secondary';
-    testBtn.style.minHeight='36px';
-    testBtn.style.padding='6px 10px';
-    testBtn.textContent='▶';
-    testBtn.onclick=()=>{
-      primeSpeech();
-      doSpeak(conf.display+': проверка голоса', true, conf);
-    };
-    row.append(nameEl, sel, testBtn);
-    el.append(row);
+    voiceSel.onchange=()=>{conf.voiceIndex=Number(voiceSel.value);saveSettings();};
+
+    wrap.append(top, timbreSel, voiceSel);
+    el.append(wrap);
   });
+}
+
+if($('resetSpeakers')){
+  $('resetSpeakers').onclick=()=>{
+    state.speakers={};state.speakerOrder=[];
+    saveSettings();renderSpeakers();
+    if($('speakerBadge'))$('speakerBadge').textContent='—';
+    setStatus('Список персонажей очищен.');
+  };
+}
+if($('replayLast')){
+  $('replayLast').onclick=()=>{
+    const t=state.lastSpoken||$('recognized').textContent;
+    if(!t||t==='Ожидаю субтитры…'){setStatus('Нечего повторять.');return;}
+    primeSpeech();
+    speakRecognized(t);
+  };
 }
 
 
@@ -351,7 +457,7 @@ function doSpeak(text,forceUser=false,speakerConf=null){
  const baseRate=Number($('voiceRate').value)||1;
  u.rate=baseRate * (speakerConf && speakerConf.rateMul ? speakerConf.rateMul : 1);
  u.pitch=speakerConf && speakerConf.pitch ? speakerConf.pitch : 1;
- u.volume=1;
+ u.volume=Number(($('voiceVol')&&$('voiceVol').value)||1);
  if(speakerConf && Number(speakerConf.voiceIndex)>=0 && state.voices[speakerConf.voiceIndex]){
   u.voice=state.voices[speakerConf.voiceIndex];
  }else{
@@ -371,6 +477,12 @@ function doSpeak(text,forceUser=false,speakerConf=null){
  u.onend=()=>{
   state.speaking=false;
   if(state.loop)setStatus('Слушаю субтитры…','ok');
+  // play queued line after current finishes
+  if($('waitSpeech')&&$('waitSpeech').checked&&state.pendingText&&state.pendingText!==text){
+    const queued=state.pendingText;
+    state.pendingText='';
+    setTimeout(()=>speakRecognized(queued),80);
+  }
  };
  u.onerror=e=>{
   state.speaking=false;
@@ -409,15 +521,23 @@ function doSpeak(text,forceUser=false,speakerConf=null){
 
 function speakRecognized(rawText){
  if(!$('autoSpeak').checked)return;
+ // Don't overlap if user asked to wait
+ if($('waitSpeech')&&$('waitSpeech').checked&&state.speaking){
+  state.pendingText=rawText;
+  return;
+ }
  let speakText=rawText;
  let conf=null;
+ let badge='—';
  if($('useSpeakers').checked){
   const {name, line}=parseSpeaker(rawText);
   if(name){
    conf=ensureSpeaker(name);
+   badge=name;
    speakText=$('skipName').checked ? line : (name+'. '+line);
   }
  }
+ if($('speakerBadge'))$('speakerBadge').textContent=badge;
  state.pendingText=speakText;
  doSpeak(speakText, false, conf);
 }
@@ -574,17 +694,19 @@ function drawCrop(){
  const scale=Math.min(2.5,Math.max(1.3,1300/sw));
  canvas.width=Math.round(sw*scale);canvas.height=Math.round(sh*scale);
  ctx.drawImage(video,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+ const level=Number(($('contrast')&&$('contrast').value)||1);
+ const hi=[160,148,135][level]||148, lo=[75,60,45][level]||60, mul=[2.1,2.6,3.2][level]||2.6;
  const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;
  for(let i=0;i<d.length;i+=4){
   const g=.299*d[i]+.587*d[i+1]+.114*d[i+2];
-  const v=g>148?255:(g<60?0:Math.max(0,Math.min(255,(g-48)*2.6)));
+  const v=g>hi?255:(g<lo?0:Math.max(0,Math.min(255,(g-(lo-12))*mul)));
   d[i]=d[i+1]=d[i+2]=v;
  }
  ctx.putImageData(img,0,0);
 }
 
 async function scanOnce(){
- if(!state.loop||state.busy||!state.worker||!state.stream||video.readyState<2)return;
+ if(!state.loop||state.paused||state.busy||!state.worker||!state.stream||video.readyState<2)return;
  state.busy=true;
  try{
   drawCrop();
@@ -646,7 +768,7 @@ async function startCamera(){
   await ensureWorker();
   await requestWakeLock();
   state.loop=true;
-  $('start').disabled=true;$('stop').disabled=false;$('testFrame').disabled=false;
+  $('start').disabled=true;$('stop').disabled=false;$('testFrame').disabled=false;if($('pauseScan')){$('pauseScan').disabled=false;$('pauseScan').textContent='⏸ Пауза распознавания';}state.paused=false;
   setBadge('КАМЕРА АКТИВНА','live');
   setStatus('Работаю. Наведи рамку на субтитры.','ok');
   scanLoop();
@@ -664,7 +786,7 @@ function stopCamera(){
  if(state.wakeLock){try{state.wakeLock.release();}catch{}state.wakeLock=null;}
  video.pause();video.srcObject=null;video.style.display='none';selection.style.display='none';
  $('placeholder').classList.remove('hidden');
- $('start').disabled=false;$('stop').disabled=true;$('testFrame').disabled=true;
+ $('start').disabled=false;$('stop').disabled=true;$('testFrame').disabled=true;if($('pauseScan'))$('pauseScan').disabled=true;state.paused=false;
  setBadge('ОСТАНОВЛЕНО');
  try{speechSynthesis.cancel();}catch{}
  setStatus('Остановлено.');
@@ -694,6 +816,64 @@ document.addEventListener('touchstart',()=>{
 if('serviceWorker'in navigator&&location.protocol.startsWith('http')){
  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 }
+
+
+// —— UI extras 1.8 ——
+if($('voiceVol'))$('voiceVol').addEventListener('input',()=>{if($('volValue'))$('volValue').textContent=Number($('voiceVol').value).toFixed(2);saveSettings();});
+if($('contrast'))$('contrast').addEventListener('input',()=>{const L=['мягкий','норма','жёсткий'];if($('contrastValue'))$('contrastValue').textContent=L[Number($('contrast').value)]||'норма';saveSettings();});
+document.querySelectorAll('#modeChips .chip').forEach(chip=>{
+ chip.addEventListener('click',()=>{
+  document.querySelectorAll('#modeChips .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  const mode=chip.getAttribute('data-mode');
+  if(mode==='fast'){$('interval').value='1400';$('confidence').value='1';}
+  if(mode==='balanced'){$('interval').value='2000';$('confidence').value='2';}
+  if(mode==='stable'){$('interval').value='2800';$('confidence').value='3';}
+  saveSettings();setStatus('Профиль: '+chip.textContent,'ok');
+ });
+});
+if($('frameBottom'))$('frameBottom').onclick=()=>{rect={x:.04,y:.72,w:.92,h:.22};renderRect();saveRect();setStatus('Рамка: низ экрана');};
+if($('frameWide'))$('frameWide').onclick=()=>{rect={x:.02,y:.62,w:.96,h:.30};renderRect();saveRect();setStatus('Рамка: широкая');};
+if($('frameCenter'))$('frameCenter').onclick=()=>{rect={x:.1,y:.4,w:.8,h:.25};renderRect();saveRect();setStatus('Рамка: центр');};
+if($('pauseScan'))$('pauseScan').onclick=()=>{
+ if(!state.loop)return;
+ state.paused=!state.paused;
+ $('pauseScan').textContent=state.paused?'▶ Продолжить':'⏸ Пауза распознавания';
+ setBadge(state.paused?'ПАУЗА':'КАМЕРА АКТИВНА',state.paused?'':'live');
+ setStatus(state.paused?'Распознавание на паузе.':'Распознавание продолжено.','ok');
+};
+if($('copyText'))$('copyText').onclick=async()=>{
+ const t=$('recognized').textContent||'';
+ if(!t||t==='Ожидаю субтитры…'){setStatus('Нечего копировать.');return;}
+ try{await navigator.clipboard.writeText(t);setStatus('Скопировано.','ok');}catch{setStatus('Не удалось скопировать.','error');}
+};
+if($('exportHistory'))$('exportHistory').onclick=()=>{
+ if(!state.history.length){setStatus('История пуста.');return;}
+ const lines=state.history.map(h=>'['+h.time+'] '+h.text).join('\n');
+ const blob=new Blob([lines],{type:'text/plain;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='gta-reader-history.txt';a.click();URL.revokeObjectURL(a.href);
+ setStatus('История экспортирована.','ok');
+};
+document.querySelectorAll('.card .section-title').forEach(title=>{
+ title.addEventListener('click',e=>{
+  if(e.target.closest('input,select,button,a'))return;
+  const card=title.closest('.card');if(!card)return;
+  card.classList.toggle('collapsed');
+  try{const map=JSON.parse(localStorage.getItem('gtaReaderCollapse')||'{}');const key=title.childNodes[0].textContent.trim();map[key]=card.classList.contains('collapsed');localStorage.setItem('gtaReaderCollapse',JSON.stringify(map));}catch{}
+ });
+});
+try{
+ const map=JSON.parse(localStorage.getItem('gtaReaderCollapse')||'{}');
+ document.querySelectorAll('.card .section-title').forEach(title=>{
+  const key=title.childNodes[0].textContent.trim();
+  if(key in map){const card=title.closest('.card');if(card)card.classList.toggle('collapsed',!!map[key]);}
+ });
+}catch{}
+const __save=saveSettings;
+saveSettings=function(){__save();try{const s=JSON.parse(localStorage.getItem('gtaReaderSettings')||'{}');s.voiceVol=$('voiceVol')?$('voiceVol').value:1;s.contrast=$('contrast')?$('contrast').value:1;localStorage.setItem('gtaReaderSettings',JSON.stringify(s));}catch{}};
+const __load=loadSettings;
+loadSettings=function(){__load();try{const s=JSON.parse(localStorage.getItem('gtaReaderSettings')||'{}');if(s.voiceVol&&$('voiceVol')){$('voiceVol').value=s.voiceVol;if($('volValue'))$('volValue').textContent=Number(s.voiceVol).toFixed(2);}if(s.contrast!=null&&$('contrast')){$('contrast').value=s.contrast;const L=['мягкий','норма','жёсткий'];if($('contrastValue'))$('contrastValue').textContent=L[Number(s.contrast)]||'норма';}}catch{}};
+
 
 loadSettings();
 })();
